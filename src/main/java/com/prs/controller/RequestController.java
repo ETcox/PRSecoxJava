@@ -126,7 +126,9 @@ public class RequestController {
 	public Request reviewRequest(@PathVariable int id) {
 
 		Request request = requestRepo.findById(id).get();
-
+		
+		request.setSubmittedDate(LocalDate.now());
+		
 		if (request.getTotal() <= 50) {
 			request.setStatus(statusApproved);
 		} else {
