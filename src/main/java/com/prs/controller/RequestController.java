@@ -46,6 +46,7 @@ public class RequestController {
 	@PostMapping("")
 	public Request addRequest(@RequestBody Request request) {
 		request.setSubmittedDate(LocalDate.now());
+		request.setTotal(0);
 		return requestRepo.save(request);
 	}
 

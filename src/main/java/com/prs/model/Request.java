@@ -3,7 +3,7 @@ package com.prs.model;
 import java.time.LocalDate;
 
 
-import jakarta.persistence.Column;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -25,13 +25,9 @@ public class Request {
 			private String description;
 			private String justification ;
 			private LocalDate dateNeeded ;
-			@Column(columnDefinition = "varchar(25) default 'Pickup'")
 			private String deliveryMode;
-			@Column(columnDefinition = "varchar(20) default 'NEW'")
 			private String status ;
-			@Column(columnDefinition = "decimal default 0")
 			private double total;
-			@Column(columnDefinition = "datetime default CURRENT_TIMESTAMP")
 			private LocalDate submittedDate ;
 			private String reasonForRejection ;
 			
