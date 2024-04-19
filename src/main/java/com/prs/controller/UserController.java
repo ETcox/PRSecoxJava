@@ -29,6 +29,10 @@ public class UserController {
 	public User getUserById(@PathVariable int id) {
 
 		Optional<User> u = userRepo.findById(id);
+		if (u == null) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This user does not exist");
+		}
+		
 		return u.get();
 	}
 
@@ -44,7 +48,7 @@ public class UserController {
 			System.err.println("User id does not match path id.");
 			// TODO return error to front end.
 		} else if (!userRepo.existsById(id)) {
-			System.err.println("User does not exist for id" + id);
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This user does not exist");
 		} else {
 			u = userRepo.save(user);
 		}
@@ -58,7 +62,8 @@ public class UserController {
 			userRepo.deleteById(id);
 			success = true;
 		} else {
-			System.err.println("Delete Error! No user exists for id: " + id);
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This user does not exist");
+			
 		}
 
 		return success;

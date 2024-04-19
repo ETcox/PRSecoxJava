@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.prs.db.LineItemRepo;
 import com.prs.db.RequestRepo;
@@ -30,13 +32,25 @@ public class LineItemController {
 	@GetMapping("/{id}")
 	public LineItem getById(@PathVariable int id) {
 		Optional<LineItem> li = lineItemRepo.findById(id);
+
+		if (!lineItemRepo.existsById(id)) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This request does not exist");
+		}
+
 		return li.get();
 	}
 
 	@GetMapping("lines-for-pr/{id}")
-	public List<LineItem> GetLineItemsByRequestId(@PathVariable int id) {
+	public List<LineItem> getLineItemsByRequestId(@PathVariable int id) {
 
-		return lineItemRepo.findAllByRequestId(id);
+		List<LineItem> li = lineItemRepo.findAllByRequestId(id);
+
+		if (li == null) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No requests found by this id");
+		} else {
+			return lineItemRepo.findAllByRequestId(id);
+		}
+
 	}
 
 	@PostMapping("")
@@ -55,7 +69,7 @@ public class LineItemController {
 			System.err.println("LineItem id does not match path id.");
 			// TODO return error to front end.
 		} else if (!lineItemRepo.existsById(id)) {
-			System.err.println("LineItem does not exist for id" + id);
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This lineitem does not exist");
 		} else {
 			Request request = lineItem.getRequest();
 			li = lineItemRepo.save(lineItem);
@@ -76,7 +90,7 @@ public class LineItemController {
 			success = true;
 
 		} else {
-			System.err.println("Delete Error! No lineitem exists for id: " + id);
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This lineitem does not exist");
 		}
 
 		return success;

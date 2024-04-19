@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.prs.db.RequestRepo;
 import com.prs.model.Request;
@@ -40,6 +42,11 @@ public class RequestController {
 	public Request getRequestById(@PathVariable int id) {
 
 		Optional<Request> r = requestRepo.findById(id);
+		
+		if (r == null) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This request does not exist");
+		}
+		
 		return r.get();
 	}
 
@@ -58,7 +65,7 @@ public class RequestController {
 			System.err.println("Request id does not match path id.");
 			// TODO return error to front end.
 		} else if (!requestRepo.existsById(id)) {
-			System.err.println("Request does not exist for id" + id);
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This request does not exist");
 		} else {
 			r = requestRepo.save(request);
 		}
@@ -74,7 +81,7 @@ public class RequestController {
 
 			success = true;
 		} else {
-			System.err.println("Delete Error! No request exists for id: " + id);
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This request does not exist");
 		}
 
 		return success;
@@ -85,7 +92,12 @@ public class RequestController {
 	@GetMapping("/reviews/{UserId}")
 	public List<Request> getAllRequestForReview(@PathVariable int UserId) {
 
-		List<Request> req = requestRepo.findByUserIdNot(UserId);
+		List<Request> req = requestRepo.findAllByStatusAndUserIdNot(statusReview,UserId);
+		
+		if(req == null) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This request does not exist");
+		}
+		
 		return req;
 	}
 
@@ -99,7 +111,10 @@ public class RequestController {
 
 		if (requestRepo.existsById(id))
 			request.setStatus(statusApproved);
-
+		
+		if(!requestRepo.existsById(id)) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This request does not exist");
+		}
 		// save status change
 		requestRepo.save(request);
 		return request;
@@ -119,14 +134,23 @@ public class RequestController {
 			request.setReasonForRejection(reason);
 			requestRepo.save(request);
 		}
+		
+		if(!requestRepo.existsById(id)) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This request does not exist");
+		}
+		
 		return request;
 
 	}
 
-	@PutMapping("/review/{id}")
+	@PostMapping("/review/{id}")
 	public Request reviewRequest(@PathVariable int id) {
 
 		Request request = requestRepo.findById(id).get();
+		
+		if(request == null) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This request does not exist");
+		}
 		
 		request.setSubmittedDate(LocalDate.now());
 		

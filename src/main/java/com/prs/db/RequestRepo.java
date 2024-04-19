@@ -12,7 +12,7 @@ import com.prs.model.Request;
 public interface RequestRepo extends JpaRepository<Request,Integer> {
 	
 	
-	List<Request> findByUserIdNot(int id);
+	List<Request> findAllByStatusAndUserIdNot(String status, int id);
 	
 	
 	
